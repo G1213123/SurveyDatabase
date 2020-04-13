@@ -19,6 +19,7 @@ from django.conf.urls import url
 from .import views
 from rest_framework.routers import DefaultRouter
 from .views import SvViewSet, HomepageVIew, dataset
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 router = DefaultRouter()
 router.register(r'data', SvViewSet, basename='data')
@@ -27,3 +28,5 @@ urlpatterns = [
     url(r'^$', HomepageVIew.as_view(), name='home'),
     url(r'^data/$', dataset, name='data')
 ]
+
+urlpatterns += staticfiles_urlpatterns()
