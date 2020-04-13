@@ -1,9 +1,8 @@
 import re
-import SelectDateWidget
-from django.forms.widgets import Widget, Select, MultiWidget
+from django.forms.widgets import Widget, Select
 from django.utils.safestring import mark_safe
 
-__all__ = ('SelectTimeWidget', 'SplitSelectDateTimeWidget')
+__all__ = ('SelectTimeWidget',)
 
 # Attempt to match many time formats:
 # Example: "12:34:56 P.M."  matches:
@@ -33,12 +32,15 @@ class SelectTimeWidget( Widget ):
     second_field = '%s_second'
     meridiem_field = '%s_meridiem'
     twelve_hr = False  # Default to 24hr.
+    use_seconds = True
 
-    def __init__(self, attrs=None, hour_step=None, minute_step=None, second_step=None, twelve_hr=False):
+    def __init__(self, attrs=None, hour_step=None, minute_step=None, second_step=None, twelve_hr=False,
+                 use_seconds=True):
         """
         hour_step, minute_step, second_step are optional step values for
         for the range of values for the associated select element
         twelve_hr: If True, forces the output to be in 12-hr format (rather than 24-hr)
+        use_seconds: If False, doesn't show seconds select element and stores seconds = 0.
         """
         self.attrs = attrs or {}
 
@@ -65,7 +67,9 @@ class SelectTimeWidget( Widget ):
         else:
             self.seconds = range( 0, 60 )
 
-    def render(self, name, value, attrs=None):
+        self.use_seconds = use_seconds
+
+    def render(self, name, value, attrs=None, renderer=None):
         try:  # try to get time values from a datetime.time object (value)
             hour_val, minute_val, second_val = value.hour, value.minute, value.second
             if self.twelve_hr:
@@ -75,7 +79,7 @@ class SelectTimeWidget( Widget ):
                     self.meridiem_val = 'a.m.'
         except AttributeError:
             hour_val = minute_val = second_val = 0
-            if isinstance( value, basestring ):
+            if isinstance( value, str ):
                 match = RE_TIME.match( value )
                 if match:
                     time_groups = match.groups();
@@ -103,7 +107,7 @@ class SelectTimeWidget( Widget ):
         if self.twelve_hr and self.meridiem_val:
             if self.meridiem_val.lower().startswith( 'p' ) and hour_val > 12 and hour_val < 24:
                 hour_val = hour_val % 12
-        elif hour_val == 0:
+        elif self.twelve_hr and hour_val == 0:
             hour_val = 12
 
         output = []
@@ -119,7 +123,7 @@ class SelectTimeWidget( Widget ):
         second_val = u"%.2d" % second_val
 
         hour_choices = [("%.2d" % i, "%.2d" % i) for i in self.hours]
-        local_attrs = self.build_attrs( id=self.hour_field % id_ )
+        local_attrs = self.build_attrs( attrs, {'id':self.hour_field % id_} )
         select_html = Select( choices=hour_choices ).render( self.hour_field % name, hour_val, local_attrs )
         output.append( select_html )
 
@@ -128,10 +132,11 @@ class SelectTimeWidget( Widget ):
         select_html = Select( choices=minute_choices ).render( self.minute_field % name, minute_val, local_attrs )
         output.append( select_html )
 
-        second_choices = [("%.2d" % i, "%.2d" % i) for i in self.seconds]
-        local_attrs['id'] = self.second_field % id_
-        select_html = Select( choices=second_choices ).render( self.second_field % name, second_val, local_attrs )
-        output.append( select_html )
+        if self.use_seconds:
+            second_choices = [("%.2d" % i, "%.2d" % i) for i in self.seconds]
+            local_attrs['id'] = self.second_field % id_
+            select_html = Select( choices=second_choices ).render( self.second_field % name, second_val, local_attrs )
+            output.append( select_html )
 
         if self.twelve_hr:
             #  If we were given an initial value, make sure the correct meridiem gets selected.
@@ -155,8 +160,8 @@ class SelectTimeWidget( Widget ):
     def value_from_datadict(self, data, files, name):
         # if there's not h:m:s data, assume zero:
         h = data.get( self.hour_field % name, 0 )  # hour
-        m = data.get( self.minute_field % name, 0 )  # minute
-        s = data.get( self.second_field % name, 0 )  # second
+        m = data.get( self.minute_field % name, '00' )  # minute
+        s = data.get( self.second_field % name, '00' )  # second
 
         meridiem = data.get( self.meridiem_field % name, None )
 
