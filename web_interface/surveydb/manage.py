@@ -2,13 +2,7 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from .bokehMap import __init__
-from .bokehMap import admin
-from .bokehMap import apps
-from .bokehMap import models
-from .bokehMap import SelectTimeWidget
-from .bokehMap import urls
-from .bokehMap import views
+import bokehMap
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'surveydb.settings')
