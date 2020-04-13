@@ -4,11 +4,19 @@ block_cipher = None
 
 
 a = Analysis(['manage.py'],
-             pathex=['C:\\Users\\ngwin\\PycharmProjects\\SurveyDatabase\\web_interface\\surveydb'],
+             pathex=['C:\\Users\\ngwin\\PycharmProjects\\SurveyDatabase\\web_interface\\surveydb',
+						'C:\\Users\\ngwin\\PycharmProjects\\SurveyDatabase\\web_interface\\bokehMap'],
              binaries=[],
              datas=[(r'C:\Users\ngwin\PycharmProjects\SurveyDatabase\web_interface\surveydb\bokehMap\static', r'.\static'),
 					(r'C:\Users\ngwin\PycharmProjects\SurveyDatabase\web_interface\surveydb\bokehMap\templates', r'.\templates')],
-             hiddenimports=[],
+             hiddenimports=[
+				'django.contrib.admin',
+				'django.contrib.auth',
+				'django.contrib.contenttypes',
+				'django.contrib.sessions',
+				'django.contrib.messages',
+				'django.contrib.staticfiles',
+				'django.contrib.gis',],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
