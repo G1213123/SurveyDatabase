@@ -17,10 +17,11 @@
                 height: 100%;
             }
         </style>
-      <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}"></script>
+        <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}"></script>
+        <script type="text/javascript" src="{% static 'dist/leaflet-search.src.js' %}"></script>
         <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.5.0/MarkerCluster.Default.css" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.5.0/leaflet.markercluster.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.js"></script>
 
@@ -37,11 +38,11 @@
             var slidervar = document.getElementById('slider');
             noUiSlider.create(slidervar, {
                 connect: true,
-                start: [ 2015, ThisYear ],
+                start: [ 2015, new Date().getFullYear() ],
                 step: 1,
                 range: {
                     min: 2015,
-                    max: ThisYear
+                    max: new Date().getFullYear()
                 }
             });
             document.getElementById('input-number-min').setAttribute("pattern", "number");
@@ -61,6 +62,8 @@
                 } else {
                     document.getElementById('input-number-max').value =  Math.floor(values[1]);
                 }
+                rangeMin = document.getElementById('input-number-min').value;
+                rangeMax = document.getElementById('input-number-max').value;
             });
     </script>
     </div>
@@ -69,6 +72,7 @@
     var head_column = ["SurveyID", "Job Number", "Project Name", "Survey", "Issue Date"]
 
     function out_layers(map,options){
+
         function protecland_marker(feature, latlng) {
             return L.circleMarker(latlng, {
                 radius: 8.0,
@@ -80,6 +84,7 @@
                 popupAnchor:  [-4, 0]
             })
         }
+
         function popUp(f,l){
             var out = [];
             if (f.properties){
@@ -89,15 +94,40 @@
                 l.bindPopup(out.join("<br />"));
             }
         }
-        var jsonTest = new L.GeoJSON.AJAX("{% url 'data' %}",{
+
+        var markersLayer = L.markerClusterGroup({
+    iconCreateFunction: function (cluster) {
+        var markers = cluster.getAllChildMarkers();
+        var html = '<div class="circle">' + markers.length + '</div>';
+        return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32, 32) });
+    },
+    spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: false
+});
+
+        var controlSearch = new L.Control.Search({
+            position:'topright',
+            layer: markersLayer,
+            initial: false,
+            zoom: 12,
+            marker: false
+        });
+
+        map.addControl( controlSearch );
+
+
+        var map_survey_str =  JSON.parse('{{ survey }}')
+        var map_survey = JSON.parse(map_survey_str)
+        L.geoJson(map_survey,{
                 coordsToLatLng: function (coords) {
                     return new L.LatLng(coords[0], coords[1], coords[2]);
                 },
                 onEachFeature:popUp,
                 pointToLayer:protecland_marker
-            }).addTo(map);
+            }).addTo(markersLayer);
 
-          }
+        map.addLayer(markersLayer);
+
+        }
     </script>
     {% leaflet_map "map" callback="window.out_layers" %}
 
