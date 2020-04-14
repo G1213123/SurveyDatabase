@@ -10,11 +10,19 @@ from django.db import models
 from django.contrib.gis.db import models as gismodels
 from django.contrib.gis import forms
 from .import SelectTimeWidget
+from django.forms import Textarea
 import os
 
 @admin.register(Survey)
 class SurveyAdmin(OSMGeoAdmin):
     list_display = [x.name for x in Survey._meta.fields]
+    ordering = ('SurveyID',)
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(
+            attrs={'rows': 1,
+                   'cols': 40,
+                   'style': 'height: 8em;'})},
+    }
     #redirect(r'/admin/bokehMap/survey/add/')
     def response_add(self, request, obj, post_url_continue="../%s/"):
         if '_continue' in request.POST:

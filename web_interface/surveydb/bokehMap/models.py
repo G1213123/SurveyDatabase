@@ -5,11 +5,15 @@ from django.shortcuts import redirect
 from django.contrib.gis.db import models
 from multiselectfield import MultiSelectField
 
-SURVEY_CHOICES = ((1, 'Vehicular Count'),
-                  (2, 'Pedestrian Count'),
-                  (3, 'Public Transport Count'),
-                  (4, 'Car Park Survey'),
-                  (5, 'Illegal Parking Survey'))
+
+SURVEY_CHOICES = (("Vehicular", 'Vehicular Count'),
+                  ("Pedestrian", 'Pedestrian Count'),
+                  ("Public Transport", 'Public Transport Count'),
+                  ("Parking", 'Parking Survey'),
+                  ("Illegal Parking", 'Illegal Parking Survey'),
+                  ("Queue Length", 'Queue Length'),
+                  ("Interview", 'Interview')
+                  )
 
 
 class SurveyManager( models.Manager ):
@@ -18,12 +22,12 @@ class SurveyManager( models.Manager ):
 
 class Survey( models.Model ):
     SurveyID = models.CharField( max_length=10, unique=True, blank=False, primary_key=True )
-    JobNumber = models.CharField( max_length=10 )
-    Project = models.CharField( max_length=500 )
-    Survey = MultiSelectField( choices=SURVEY_CHOICES )
-    Author = models.CharField( max_length=20 )
-    IssueDate = models.DateField()
-    Amount = models.DecimalField( max_digits=10, decimal_places=2 )
+    JobNumber = models.CharField( max_length=10, default=None, blank=True, null=True  )
+    Project = models.TextField( max_length=500, default=None, blank=True, null=True  )
+    Survey = MultiSelectField( choices=SURVEY_CHOICES, default=None, blank=True, null=True  )
+    Author = models.CharField( max_length=20, default=None, blank=True, null=True  )
+    IssueDate = models.DateField(default=None, blank=True, null=True )
+    Amount = models.DecimalField( max_digits=10, decimal_places=2, default=None, blank=True, null=True  )
     PaymentStatus = models.DateField( default=None, blank=True, null=True )
     Remark = models.CharField( max_length=500, default=None, blank=True, null=True )
 

@@ -33,17 +33,19 @@
     <input type="number" min='1' max='35675999' id="input-number-min">
     <input type="number" min='2' max='35676000' id="input-number-max">
     <script type="text/javascript">
+            var ThisYear = new Date().getFullYear()
             var slidervar = document.getElementById('slider');
             noUiSlider.create(slidervar, {
                 connect: true,
-                start: [ 1, 35676000 ],
+                start: [ 2015, ThisYear ],
+                step: 1,
                 range: {
-                    min: 1,
-                    max: 35676000
+                    min: 2015,
+                    max: ThisYear
                 }
             });
-            document.getElementById('input-number-min').setAttribute("value", 1);
-            document.getElementById('input-number-max').setAttribute("value", 35676000);
+            document.getElementById('input-number-min').setAttribute("pattern", "number");
+            document.getElementById('input-number-max').setAttribute("pattern", "number");
             var inputNumberMin = document.getElementById('input-number-min');
             var inputNumberMax = document.getElementById('input-number-max');
             inputNumberMin.addEventListener('change', function(){
@@ -55,9 +57,9 @@
             slidervar.noUiSlider.on('update', function( values, handle ) {
                 //handle = 0 if min-slider is moved and handle = 1 if max slider is moved
                 if (handle==0){
-                    document.getElementById('input-number-min').value = values[0];
+                    document.getElementById('input-number-min').value = Math.floor(values[0]);
                 } else {
-                    document.getElementById('input-number-max').value =  values[1];
+                    document.getElementById('input-number-max').value =  Math.floor(values[1]);
                 }
             });
     </script>

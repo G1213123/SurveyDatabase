@@ -27,7 +27,7 @@ SECRET_KEY = '2avjf+ljy4c-+07e^jq2(bdk93$r(k5+x-t3y_scb3i#w-mljg'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.35.40.130']
 
 if os.name == 'nt':
     import platform
