@@ -84,7 +84,7 @@
             var out = [];
             if (f.properties){
                 for(key in f.properties.SurveyID){
-                    out.push(head_column[key]+": "+f.properties.SurveyID[key]);
+                    out.push("<b>" + head_column[key]+": </b>"+f.properties.SurveyID[key]);
                 }
                 l.bindPopup(out.join("<br />"));
             }
