@@ -18,14 +18,15 @@ from django.urls import path, include
 from django.conf.urls import url
 from .import views
 from rest_framework.routers import DefaultRouter
-from .views import  MapView, dataset
+from .views import  MapView, dataset, QueryForm
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 
 urlpatterns = [
     url(r'^$', MapView, name='home'),
-    url(r'^data/$', dataset, name='data')
+    url(r'^data/$', dataset, name='data'),
+    url(r'^form/$', QueryForm)
 ]
 
 urlpatterns += staticfiles_urlpatterns()

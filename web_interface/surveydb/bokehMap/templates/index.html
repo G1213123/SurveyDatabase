@@ -16,6 +16,15 @@
             html, body, #map {
                 height: 100%;
             }
+            .mycluster {
+                background: lightblue;
+                border-radius: 50%;
+                width: 100px;
+                height: 100px;
+                border: solid;
+                text-align: center;
+                line-height: 24px;
+                font-size: 24px;
         </style>
         <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}"></script>
         <script type="text/javascript" src="{% static 'dist/leaflet-search.src.js' %}"></script>
@@ -29,6 +38,38 @@
     <title>Survey Map</title>
     </head>
     <body>
+
+    <form action="{% url 'home' %}">
+
+        <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            Filter Books
+        </a>
+        <input type="submit" class="btn btn-info" form="id_query_form" formaction="{% url 'books:csv' %}" value="Export CSV">
+        <input type="submit" class="btn btn-default" form="id_query_form" formaction="{% url 'books:xls' %}" value="Export XLS">
+    </form>
+
+    <form method="get" action="." id="id_query_form">
+        <p>
+            {{ form.keywords }}
+        </p>
+        <div class="row">
+            <div class="col-md-6">
+                {{ form.publish_date_before }}
+            </div>
+            <div class="col-md-6">
+                {{ form.publish_date_after }}
+            </div>
+        </div>
+
+        <p></p>
+        <p>
+            <input class="btn btn-success" type="submit"/>
+            <button type="reset" class="btn btn-info" value="Reset filters">Reset filters</button>
+            <button type="reset" class="btn btn-warning" id="id_clear_filters" onclick="return resetForm(this.form);">Clear Filters</button>
+        </p>
+
+    </form>
+
     <div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
     <div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
     <input type="number" min='1' max='35675999' id="input-number-min">
@@ -71,7 +112,10 @@
     <script type="text/javascript">
     var head_column = ["SurveyID", "Job Number", "Project Name", "Survey", "Issue Date"]
 
-    function out_layers(map,options){
+
+
+    function out_layers(map, options){
+    map.addLayer(new L.TileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'));
 
         function protecland_marker(feature, latlng) {
             return L.circleMarker(latlng, {
@@ -96,18 +140,18 @@
         }
 
         var markersLayer = L.markerClusterGroup({
-    iconCreateFunction: function (cluster) {
-        var markers = cluster.getAllChildMarkers();
-        var html = '<div class="circle">' + markers.length + '</div>';
-        return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32, 32) });
-    },
-    spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: false
-});
+            iconCreateFunction: function (cluster) {
+                var markers = cluster.getAllChildMarkers();
+                var html = '<div class="circle">' + markers.length + '</div>';
+                return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(24, 24) });
+            },
+            spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: false
+        });
 
         var controlSearch = new L.Control.Search({
             position:'topright',
             layer: markersLayer,
-            initial: false,
+            initial: true,
             zoom: 12,
             marker: false
         });
@@ -126,6 +170,8 @@
             }).addTo(markersLayer);
 
         map.addLayer(markersLayer);
+
+
 
         }
     </script>
