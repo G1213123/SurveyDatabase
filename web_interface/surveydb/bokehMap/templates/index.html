@@ -138,14 +138,13 @@
                          return (feature.properties.SurveyID[4].substr(0,4) <= rangeMax) &&
                             (feature.properties.SurveyID[4].substr(0,4) >= rangeMin);
                         }
-                        return false;
                     },
                 onEachFeature:popUp,
                 pointToLayer:protecland_marker
             }).addTo(markersLayer);
 
             map.addLayer(markersLayer);
-
+            return markersLayer;
         }
 
     function create_map(map, options){
@@ -180,12 +179,12 @@
                 rangeMin = document.getElementById('input-number-min').value;
                 rangeMax = document.getElementById('input-number-max').value;
                 //first let's clear the layer:
-                if(typeof markersLayer !== "undefined"){
+                if (typeof markersLayer != 'undefined' ){
                     map.removeLayer(markersLayer);
                 }
 
                 //then call the plot map function
-                out_layers(map, 123, rangeMax, rangeMin)
+                markersLayer = out_layers(map, 123, rangeMax, rangeMin)
             });
 
     }
