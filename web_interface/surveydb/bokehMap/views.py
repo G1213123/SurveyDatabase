@@ -94,7 +94,8 @@ def MapView(request):
     survey = serialize( 'geojson', locations, fields=('SurveyID', 'location'), indent=2,
                         use_natural_foreign_keys=True, use_natural_primary_keys=False )
     context = {
-        'survey':mark_safe(escapejs(json.dumps(survey))),}
+        'survey':mark_safe(escapejs(json.dumps(survey))),
+        'form':form}
     return render(request, 'index.html', context)
 
 class HomepageVIew( TemplateView ):

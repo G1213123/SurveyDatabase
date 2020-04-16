@@ -14,7 +14,7 @@
                 margin: 0;
             }
             html, body, #map {
-                height: 100%;
+                height: 640px;
             }
             .mycluster {
                 background: lightblue;
@@ -24,7 +24,28 @@
                 border: solid;
                 text-align: center;
                 line-height: 24px;
-                font-size: 24px;
+                font-size: 20px;
+            .wrapper {
+                display: flex;
+                align-items: stretch;
+            }
+            .fill {
+                min-height: 100%;
+                height: 100%;
+            }
+            #sidebar {
+                min-width: 250px;
+                max-width: 250px;
+            }
+
+            #sidebar.active {
+                margin-left: -250px;
+            }
+            #sidebar {
+                min-width: 250px;
+                max-width: 250px;
+                min-height: 100vh;
+            }
         </style>
         <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}"></script>
         <script type="text/javascript" src="{% static 'dist/leaflet-search.src.js' %}"></script>
@@ -33,58 +54,104 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script
+  src="https://code.jquery.com/jquery-3.5.0.slim.min.js"
+  integrity="sha256-MlusDLJIP1GRgLrOflUQtshyP0TwT/RHXsI1wWGnQhs="
+  crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+     <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
 
 
     <title>Survey Map</title>
     </head>
     <body>
+    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script
+      src="https://code.jquery.com/jquery-3.5.0.slim.min.js"
+      integrity="sha256-MlusDLJIP1GRgLrOflUQtshyP0TwT/RHXsI1wWGnQhs="
+      crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
 
-    <form action="{% url 'home' %}">
 
-        <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-            Filter Books
-        </a>
-        <input type="submit" class="btn btn-info" form="id_query_form" formaction="{% url 'form' %}" value="Export CSV">
-        <input type="submit" class="btn btn-default" form="id_query_form" formaction="{% url 'form' %}" value="Export XLS">
-        <input type="submit" class="btn btn-default" formaction="{% url 'admin:index' %}" value="Manage Survey">
-    </form>
-
-    <form method="get" action="." id="id_query_form">
-        <p>
-            {{ form.keywords }}
-        </p>
-        <div class="row">
-            <div class="col-md-6">
-                {{ form.publish_date_before }}
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>WSP Traffic Survey Map</h3>
             </div>
-            <div class="col-md-6">
-                {{ form.publish_date_after }}
+            <div class="bg-light border-right" id="sidebar-wrapper">
+                <form action="{% url 'home' %}">
+                    <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                        Filter Books
+                    </a>
+                    <input type="submit" class="btn btn-info" form="id_query_form" formaction="{% url 'form' %}" value="Export CSV">
+                    <input type="submit" class="btn btn-default" form="id_query_form" formaction="{% url 'form' %}" value="Export XLS">
+                    <div class="pull-right">
+                        <input type="submit" class="btn btn-success" formaction="{% url 'admin:index' %}" value="Manage Survey">
+                    </div>
+                </form>
+
+                <form method="get" action="." id="id_query_form">
+                    <p>
+                        {{ form.keywords }}
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.publish_date_before }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.publish_date_after }}
+                        </div>
+                    </div>
+
+                    <p></p>
+                    <p>
+                        <input class="btn btn-success" type="submit"/>
+                        <button type="reset" class="btn btn-info" value="Reset filters">Reset filters</button>
+                        <button type="reset" class="btn btn-warning" id="id_clear_filters" onclick="return resetForm(this.form);">Clear Filters</button>
+                    </p>
+
+                </form>
+
+                <div id="slider" style="left: 0px; right: 1px; margin: 10px 25px;"></div>
+                <div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
+                <input type="number" min='1' max='35675999' id="input-number-min">
+                <input type="number" min='2' max='35676000' id="input-number-max">
+                </div>
             </div>
-        </div>
+        </nav>
+    <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
 
-        <p></p>
-        <p>
-            <input class="btn btn-success" type="submit"/>
-            <button type="reset" class="btn btn-info" value="Reset filters">Reset filters</button>
-            <button type="reset" class="btn btn-warning" id="id_clear_filters" onclick="return resetForm(this.form);">Clear Filters</button>
-        </p>
+                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                    <i class="fas fa-align-left"></i>
+                    <span>Toggle Sidebar</span>
+                </button>
 
-    </form>
+            </div>
+        </nav>
 
-    <div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
-    <div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
-    <input type="number" min='1' max='35675999' id="input-number-min">
-    <input type="number" min='2' max='35676000' id="input-number-max">
     </div>
-    <div id="map"></div>
+
+                <div id="map"></div>
     <script type="text/javascript">
     var head_column = ["SurveyID", "Job Number", "Project Name", "Survey", "Issue Date"]
 
     var rangeMax = 2020
     var rangeMin = 2015
 
-    function out_layers(map, options, rangeMax, rangeMin){
-        map.addLayer(new L.TileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'));
+    function out_layers(map, options, rangeMax, rangeMin, action){
+
 
         function protecland_marker(feature, latlng) {
             return L.circleMarker(latlng, {
@@ -108,21 +175,11 @@
             }
         }
 
-        var controlSearch = new L.Control.Search({
-            position:'topright',
-            layer: markersLayer,
-            initial: true,
-            zoom: 12,
-            marker: false
-        });
-
-        map.addControl( controlSearch );
-
         var markersLayer = L.markerClusterGroup({
             iconCreateFunction: function (cluster) {
                 var markers = cluster.getAllChildMarkers();
                 var html = '<div class="circle">' + markers.length + '</div>';
-                return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(24, 24) });
+                return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(28, 28) });
             },
             spiderfyOnMaxZoom: true, showCoverageOnHover: true, zoomToBoundsOnClick: true
         });
@@ -144,7 +201,7 @@
             }).addTo(markersLayer);
 
             map.addLayer(markersLayer);
-            return markersLayer;
+            return map;
         }
 
     function create_map(map, options){
@@ -179,12 +236,19 @@
                 rangeMin = document.getElementById('input-number-min').value;
                 rangeMax = document.getElementById('input-number-max').value;
                 //first let's clear the layer:
-                if (typeof markersLayer != 'undefined' ){
-                    map.removeLayer(markersLayer);
+                var reload = false;
+                if (typeof map != 'undefined'){
+                    map.eachLayer(function (layer) {
+                        if (layer._url != 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'){
+                            map.removeLayer(layer);
+                        }
+                        reload = true
+                    });
                 }
 
                 //then call the plot map function
-                markersLayer = out_layers(map, 123, rangeMax, rangeMin)
+                map = out_layers(map, 123, rangeMax, rangeMin, reload)
+
             });
 
     }

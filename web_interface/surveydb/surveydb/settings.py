@@ -153,4 +153,5 @@ LEAFLET_CONFIG = {
   'DEFAULT_ZOOM': 12,
   'MIN_ZOOM': 1,
   'MAX_ZOOM': 20,
+    'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 }
