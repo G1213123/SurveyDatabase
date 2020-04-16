@@ -23,10 +23,11 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 
+
 urlpatterns = [
     url(r'^$', MapView, name='home'),
     url(r'^data/$', dataset, name='data'),
-    url(r'^form/$', QueryForm)
+    url(r'^form/$', QueryForm, name='form'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
