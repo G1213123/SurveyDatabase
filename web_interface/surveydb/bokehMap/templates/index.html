@@ -247,7 +247,9 @@
                             (feature.properties.SurveyID[4].substr(0,4) >= rangeMin);
                         }
                     },
-                onEachFeature:popUp,
+                onEachFeature: function(f,layer){
+                    layer.each
+                popUp},
                 pointToLayer:protecland_marker
             }).addTo(markersLayer);
 

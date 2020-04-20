@@ -96,7 +96,7 @@ def MapView(request):
     context = {
         'survey':mark_safe(escapejs(json.dumps(survey))),
         'form':form}
-    return render(request, 'index2.html', context)
+    return render(request, 'index.html', context)
 
 class HomepageVIew( TemplateView ):
     template_name = 'index.html'

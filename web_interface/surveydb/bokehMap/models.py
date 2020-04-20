@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 
 from django.contrib.gis.db import models
 from multiselectfield import MultiSelectField
+from django.contrib.gis.geos import Point, MultiPoint
 
 
 SURVEY_CHOICES = (("Vehicular", 'Vehicular Count'),
@@ -58,4 +59,14 @@ class Time( models.Model ):
 
 class Location( models.Model ):
     SurveyID = models.ForeignKey( Survey, on_delete=models.CASCADE )
-    location = models.PointField( srid=4326, null=True )
+    location = models.MultiPointField( srid=4326)
+    Survey = MultiSelectField(choices=SURVEY_CHOICES, default='', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        feature = self.location
+        list=[]
+        for pt in feature:
+            list.append(Location(SurveyID=self.SurveyID, location=MultiPoint([pt])))
+
+        Location.objects.bulk_create(list)
+

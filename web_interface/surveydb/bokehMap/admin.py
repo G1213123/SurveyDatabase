@@ -27,6 +27,8 @@ class SurveyAdmin(OSMGeoAdmin):
     def response_add(self, request, obj, post_url_continue="../%s/"):
         if '_continue' in request.POST:
             return HttpResponseRedirect(f'/admin/bokehMap/time/add?SurveyID={obj.pk}')
+        else:
+            return HttpResponseRedirec(r'/admin/bokehMap/')
 
 
 
