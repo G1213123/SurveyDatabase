@@ -43,7 +43,14 @@ input[type="radio"], input[type="checkbox"] {
 #aboutTabsContent {
   padding-top: 10px;
 }
+.dot {
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px black solid;
 
+}
 .progress-bar-full {
   width: 100%;
 }

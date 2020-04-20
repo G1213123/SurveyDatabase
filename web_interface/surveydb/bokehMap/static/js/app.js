@@ -92,7 +92,9 @@ function create_map(map, options){
 	  surveys.eachLayer(function (layer) {
 		if (map.hasLayer(surveysLayer)) {
 		  if (map.getBounds().contains(layer.getLatLng())) {
-			$("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"></td><td class="feature-name">' + layer.feature.properties.SurveyID[0] + '\n' + layer.feature.properties.SurveyID[2] + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+			$("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng +
+			'"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + layer.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: '+ getColor(parseInt(layer.feature.properties.SurveyID.SurveyID	)*30) +';"></span><br />' + 
+			layer.feature.properties.SurveyID.Project + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
 		  }
 		}
 	  });
@@ -184,7 +186,7 @@ function create_map(map, options){
 		function protecland_marker(feature, latlng) {
 			return L.circleMarker(latlng, {
 				radius: 8.0,
-				fillColor: getColor(parseInt(feature.properties.SurveyID[0])*30),
+				fillColor: getColor(parseInt(feature.properties.SurveyID.SurveyID	)*30),
 				color: '#000000',
 				weight: 1,
 				opacity: 1.0,
@@ -199,8 +201,8 @@ function create_map(map, options){
 		var out = [];
 		if (f.properties){
 			for(key in f.properties.SurveyID){
-				var descipt = (key!="3")? f.properties.SurveyID[key] : f.properties.Survey;
-				out.push("<b>" + head_column[key]+": </b>"+ descipt);
+				var descipt = (key!="Survey")? f.properties.SurveyID[key] : f.properties.Survey;
+				out.push("<b>" + key+": </b>"+ descipt);
 			}
 			l.bindPopup(out.join("<br />"));
 		}
@@ -216,9 +218,9 @@ function create_map(map, options){
 			},
 			filter: function(feature, layer) {
 				if (feature.properties){
-					 return ((feature.properties.SurveyID[4].substr(0,4) <= rangeMax) &&
-						(feature.properties.SurveyID[4].substr(0,4) >= rangeMin) &&
-						(feature.properties.SurveyID[0].includes(filter_str) || feature.properties.SurveyID[1].includes(filter_str)))
+					 return ((feature.properties.SurveyID.IssueDate.substr(0,4) <= rangeMax) &&
+						(feature.properties.SurveyID.IssueDate.substr(0,4) >= rangeMin) &&
+						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.SurveyID.includes(filter_str)))
 					}
 				},
 			onEachFeature:popUp,
