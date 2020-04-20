@@ -92,6 +92,8 @@ def filter_books(Location, paramDict):
 
 def MapView(request):
     locations = Location.objects.all()
+
+
     form = QueryForm(request.GET or None)
     paramDict = request.GET
     locations = filter_books(locations, paramDict)
