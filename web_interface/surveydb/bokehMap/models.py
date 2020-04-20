@@ -67,7 +67,7 @@ class Time( models.Model ):
         return {'TStart':self.TStart.strftime("%H:%M"),  'TEnd':self.TEnd.strftime("%H:%M"), 'TTag':self.TTag}
 
     def __str__(self):
-        return f'{self.TStart.strftime("%H:%M")} - {self.TEnd.strftime("%H:%M")} [{TTag_name[self.TTag]}]'
+        return f'{self.TStart.strftime("%H:%M")} - {self.TEnd.strftime("%H:%M")} ({TTag_name[self.TTag]})'
 
 class Location( models.Model ):
     SurveyID = models.ForeignKey( Survey, on_delete=models.CASCADE )
