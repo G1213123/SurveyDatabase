@@ -128,6 +128,7 @@ function create_map(map, options){
 
 	var rangeMax = 2020
 	var rangeMin = 2015
+	var filter_str = ''
 
 	function hslToRgb(h, s, l) {
 		  var r, g, b;
@@ -183,7 +184,7 @@ function create_map(map, options){
 		function protecland_marker(feature, latlng) {
 			return L.circleMarker(latlng, {
 				radius: 8.0,
-				fillColor: getColor(parseInt(feature.properties.SurveyID[1])),
+				fillColor: getColor(parseInt(feature.properties.SurveyID[0])*30),
 				color: '#000000',
 				weight: 1,
 				opacity: 1.0,
@@ -198,7 +199,8 @@ function create_map(map, options){
 		var out = [];
 		if (f.properties){
 			for(key in f.properties.SurveyID){
-				out.push("<b>" + head_column[key]+": </b>"+f.properties.SurveyID[key]);
+				var descipt = (key!="3")? f.properties.SurveyID[key] : f.properties.Survey;
+				out.push("<b>" + head_column[key]+": </b>"+ descipt);
 			}
 			l.bindPopup(out.join("<br />"));
 		}
@@ -207,15 +209,16 @@ function create_map(map, options){
 	// layer for holding the data
 	map_survey = JSON.parse(map_survey_str)
 	
-	function populate_map(rangeMin,rangeMax){
+	function populate_map(rangeMin,rangeMax,filter_str){
 		return (L.geoJson(map_survey,{
 			coordsToLatLng: function (coords) {
 				return new L.LatLng(coords[0], coords[1], coords[2]);
 			},
 			filter: function(feature, layer) {
 				if (feature.properties){
-					 return (feature.properties.SurveyID[4].substr(0,4) <= rangeMax) &&
-						(feature.properties.SurveyID[4].substr(0,4) >= rangeMin);
+					 return ((feature.properties.SurveyID[4].substr(0,4) <= rangeMax) &&
+						(feature.properties.SurveyID[4].substr(0,4) >= rangeMin) &&
+						(feature.properties.SurveyID[0].includes(filter_str) || feature.properties.SurveyID[1].includes(filter_str)))
 					}
 				},
 			onEachFeature:popUp,
@@ -378,11 +381,24 @@ function create_map(map, options){
                             layer.clearLayers();
 				}})
 						
-				surveys = populate_map(rangeMin,rangeMax)
+				surveys = populate_map(rangeMin,rangeMax,filter_str)
 				surveys.addTo(surveysLayer);
 				$("#loading").hide();
 				syncSidebar();
 
 	})
-	
+	var filter_box = $("#filter")[0];
+	filter_box.oninput = function( ){
+		filter_str = filter_box.value;
+		
+		map.eachLayer(function (layer) {
+                        if (layer === surveysLayer){
+                            layer.clearLayers();
+				}})
+						
+		surveys = populate_map(rangeMin,rangeMax,filter_str)
+		surveys.addTo(surveysLayer);
+		$("#loading").hide();
+		syncSidebar();
+	}
 }

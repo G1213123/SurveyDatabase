@@ -27,16 +27,19 @@ class SurveyAdmin(OSMGeoAdmin):
     def response_add(self, request, obj, post_url_continue="../%s/"):
         if '_continue' in request.POST:
             return HttpResponseRedirect(f'/admin/bokehMap/time/add?SurveyID={obj.pk}')
+        else:
+            return('/admin/bokehMap/survey')
 
 
 
 @admin.register(Location)
 class LocationAdmin(OSMGeoAdmin):
-    list_display = ('SurveyID','location')
+    list_display = ('SurveyID','Survey','location')
+    readonly_fields = ('location',)
     default_lat = 2550029
     default_lon = 12709519
     default_zoom = 12
-    map_width = 1024
+    map_width = 1280
     map_height = 400
     def response_add(self, request, obj, post_url_continue="../%s/"):
         if '_addanother' in request.POST:
