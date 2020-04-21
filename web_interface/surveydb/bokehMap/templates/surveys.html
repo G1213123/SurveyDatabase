@@ -1,0 +1,200 @@
+<html>
+<head>
+
+
+
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+    .container {
+        max-width: 100%;
+    }
+</style>
+<!------ Include the above in your HEAD tag ---------->
+</head>
+<body>
+<section id="tabs" class="project-tab">
+            <div class="container">
+                <button id="exportButton" class="btn btn-lg btn-danger clearfix"><span class="fa fa-file-excel-o"></span> Export to Excel</button>
+                <div class="row">
+                    <div class="col-md-12">
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#" role="tab" aria-controls="nav-home" aria-selected="true">Surveys</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <table id="exportTable" class="table" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>SurveyID</th>
+                                            <th>JobNumber</th>
+                                            <th>Project</th>
+                                            <th>Survey</th>
+                                            <th>Author</th>
+                                            <th>IssueDate</th>
+                                            <th>Amount</th>
+                                            <th>PaymentStatus</th>
+                                            <th>Remark</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                            {% for surveys in object_list %}
+                                                <tr>
+                                                    <td> {{ surveys.SurveyID }} </td>
+                                                    <td> {{ surveys.JobNumber }} </td>
+                                                    <td> {{ surveys.Project }} </td>
+                                                    <td> {{ surveys.Survey }} </td>
+                                                    <td> {{ surveys.Author }} </td>
+                                                    <td> {{ surveys.IssueDate }} </td>
+                                                    <td> {{ surveys.Amount }} </td>
+                                                    <td> {{ surveys.PaymentStatus }} </td>
+                                                    <td> {{ surveys.Remark }} </td>
+                                                </tr>
+                                            {% empty %}
+                                                <tr>No survey yet.</tr>
+                                            {% endfor %}
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    <link rel="stylesheet" type="text/css" href="http://www.shieldui.com/shared/components/latest/css/light/all.min.css" />
+<script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
+<script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/jszip.min.js"></script>
+
+<script type="text/javascript">
+    jQuery(function ($) {
+        $("#exportButton").click(function () {
+            // parse the HTML table element having an id=exportTable
+            var dataSource = shield.DataSource.create({
+                data: "#exportTable",
+                schema: {
+                    type: "table",
+                    fields: {
+                        SurveyID: { type: String },
+                        JobNumber: { type: String },
+                        Project: { type: String },
+                        Survey: { type: String },
+                        Author: { type: String },
+                        IssueDate: { type: String },
+                        Amount: { type: Number },
+                        PaymentStatus: { type: String },
+                        Remark: { type: String },
+                    }
+                }
+            });
+
+            // when parsing is done, export the data to Excel
+            dataSource.read().then(function (data) {
+                new shield.exp.OOXMLWorkbook({
+                    author: "Nil",
+                    worksheets: [
+                        {
+                            name: "Survey Register Table",
+                            rows: [
+                                {
+                                    cells: [
+                                        {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "SurveyID"
+                                        },
+                                        {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "JobNumber"
+                                        },
+                                        {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "Project"
+                                        },
+                                        {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "Survey"
+                                        },
+                                                                                {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "Author"
+                                        },
+                                                                                {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "IssueDate"
+                                        },
+                                                                                {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "Amount"
+                                        },
+                                                                                {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "PaymentStatus"
+                                        },
+                                                                                {
+                                            style: {
+                                                bold: true
+                                            },
+                                            type: String,
+                                            value: "Remark"
+                                        },
+
+                                    ]
+                                }
+                            ].concat($.map(data, function(item) {
+                                return {
+                                    cells: [
+                                        { type: String, value: item.SurveyID },
+                                        { type: String, value: item.JobNumber },
+                                        { type: String, value: item.Project },
+                                        { type: String, value: item.Survey },
+                                        { type: String, value: item.Author },
+                                        { type: String, value: item.IssueDate },
+                                        { type: Number, value: item.Amount },
+                                        { type: String, value: item.PaymentStatus },
+                                        { type: String, value: item.Remark },
+                                    ]
+                                };
+                            }))
+                        }
+                    ]
+                }).saveAs({
+                    fileName: "Survey_Registration"
+                });
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -26,6 +26,9 @@ from django import forms
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
+from django.views.generic.list import ListView
+
+from .models import Survey
 
 # Create your views here.
 
@@ -102,7 +105,7 @@ def MapView(request):
     context = {
         'survey':mark_safe(escapejs(json.dumps(survey))),
         'form':form}
-    return render(request, 'index.html', context)
+    return render(request, 'index2.html', context)
 
 class HomepageVIew( TemplateView ):
     template_name = 'index.html'
@@ -116,3 +119,16 @@ def data_get(locations=Location):
     survey = serialize( 'geojson', Location.objects.all(), fields=('SurveyID', 'location'), indent=2,
                         use_natural_foreign_keys=True, use_natural_primary_keys=False )
     return survey
+
+
+
+class SurveyListView(ListView):
+
+    model = Survey
+    paginate_by = 100  # if pagination is desired
+    template_name = 'surveys.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+

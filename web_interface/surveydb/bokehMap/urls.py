@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf.urls import url
 from .import views
 from rest_framework.routers import DefaultRouter
-from .views import  MapView, dataset, QueryForm
+from .views import  MapView, dataset, QueryForm, SurveyListView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^$', MapView, name='home'),
     url(r'^data/$', dataset, name='data'),
     url(r'^form/$', QueryForm, name='form'),
+    url(r'^surveys/$', SurveyListView.as_view(), name='surveys')
 ]
 
 urlpatterns += staticfiles_urlpatterns()

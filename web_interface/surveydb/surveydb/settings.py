@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_filters',
     'leaflet',
     'multiselectfield',
+    'dbbackup',
     ]
 
 MIDDLEWARE = [
