@@ -23,6 +23,10 @@ from functools import reduce
 from django.db.models import Q
 from django import forms
 
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+
 # Create your views here.
 
 class QueryForm( forms.Form ):
@@ -88,10 +92,12 @@ def filter_books(Location, paramDict):
 
 def MapView(request):
     locations = Location.objects.all()
+
+
     form = QueryForm(request.GET or None)
     paramDict = request.GET
     locations = filter_books(locations, paramDict)
-    survey = serialize( 'geojson', locations, fields=('SurveyID', 'location'), indent=2,
+    survey = serialize( 'geojson', locations, fields=('SurveyID', 'Survey', 'location'), indent=2,
                         use_natural_foreign_keys=True, use_natural_primary_keys=False )
     context = {
         'survey':mark_safe(escapejs(json.dumps(survey))),
