@@ -129,7 +129,7 @@ function create_map(map, options){
 	var head_column = ["SurveyID", "Job Number", "Project Name", "Survey", "Issue Date"]
 
 	var rangeMax = 2020
-	var rangeMin = 2015
+	var rangeMin = 2017
 	var filter_str = ''
 
 	function hslToRgb(h, s, l) {
@@ -230,7 +230,7 @@ function create_map(map, options){
 	}
 	// layer for display on the map
 	
-	surveys = populate_map(2015,new Date().getFullYear())
+	surveys = populate_map(2017,new Date().getFullYear())
 	surveysLayer = L.geoJson(null).addTo(map);
 	$("#loading").hide();
 	syncSidebar();
@@ -245,23 +245,6 @@ function create_map(map, options){
 	  disableClusteringAtZoom: 8
 	}).addTo(map);
 
-
-	/* Layer control listeners that allow for a single markerClusters layer */
-	map.on("overlayadd", function(e) {
-	  if (e.layer === surveysLayer) {
-		markerClusters.addLayer(surveys);
-		syncSidebar();
-		
-	  }
-
-	});
-
-	map.on("overlayremove", function(e) {
-	  if (e.layer === surveysLayer) {
-		markerClusters.removeLayer(surveys);
-		syncSidebar();
-	  }
-	});
 
 	/* Filter sidebar feature list to only show features in current map bounds */
 	map.on("moveend", function (e) {
@@ -281,8 +264,7 @@ function create_map(map, options){
 		}
 	  });
 	}
-	map.on("layeradd", updateAttribution);
-	map.on("layerremove", updateAttribution);
+
 
 	var attributionControl = L.control({
 	  position: "bottomright"
@@ -351,10 +333,10 @@ function create_map(map, options){
 	var slidervar = $("#slider")[0];
 	noUiSlider.create(slidervar, {
 		connect: true,
-		start: [ 2015, new Date().getFullYear() ],
+		start: [ 2017, new Date().getFullYear() ],
 		step: 1,
 		range: {
-			min: 2015,
+			min: 2017,
 			max: new Date().getFullYear()
 		}
 	});
