@@ -220,7 +220,7 @@ function create_map(map, options){
 				if (feature.properties){
 					 return ((feature.properties.SurveyID.IssueDate.substr(0,4) <= rangeMax) &&
 						(feature.properties.SurveyID.IssueDate.substr(0,4) >= rangeMin) &&
-						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.SurveyID.includes(filter_str)))
+						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.Project.includes(filter_str)))
 					}
 				},
 			onEachFeature:popUp,
