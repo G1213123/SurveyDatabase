@@ -1,6 +1,6 @@
 function create_map(map, options){
 
-	var featureList, boroughSearch = [], theaterSearch = [], museumSearch = [];
+	var featureList;
 
 	$(window).resize(function() {
 	  sizeLayerControl();
@@ -74,39 +74,6 @@ function create_map(map, options){
 	  highlight.clearLayers();
 	}
 
-	function sidebarClick(id) {
-	  var layer = surveys.getLayer(id);
-	  map.setView([layer.getLatLng().lat, layer.getLatLng().lng], 17);
-	  layer.fire("click");
-	  /* Hide sidebar and go to the map on small screens */
-	  if (document.body.clientWidth <= 767) {
-		$("#sidebar").hide();
-		map.invalidateSize();
-	  }
-	}
-
-	function syncSidebar() {
-	  /* Empty sidebar features */
-	  $("#feature-list tbody").empty();
-	  /* Loop through theaters layer and add only features which are in the map bounds */
-	  surveys.eachLayer(function (layer) {
-		if (map.hasLayer(surveysLayer)) {
-		  if (map.getBounds().contains(layer.getLatLng())) {
-			$("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng +
-			'"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + layer.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: '+ getColor(parseInt(layer.feature.properties.SurveyID.SurveyID	)*30) +';"></span><br />' + 
-			layer.feature.properties.SurveyID.Project + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
-		  }
-		}
-	  });
-	  /* Update list.js featureList */
-	  featureList = new List("features", {
-		valueNames: ["feature-name"]
-	  });
-	  featureList.sort("feature-name", {
-		order: "asc"
-	  });
-	}
-
 	/* Basemap Layers */
 	var cartoLight = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", {
 	  maxZoom: 19,
@@ -176,24 +143,40 @@ function create_map(map, options){
 	function getColor(d) {
 			h = (d % 256) / 256
 			var color = hslToRgb(h, 1, 0.5);
-			var s = '#'
-			return '#' + fullColorHex.apply(null, color);
+			var s = 'rgb('
+			return s + color[0] + ',' + color[1] + ',' + color[2] + ')';
 		}
 
+	//font awesome icon used for survey types
+	surveyicon = {
+                    'Vehicular':'fa fa-car',
+                    'Pedestrian': 'fas fa-walking',
+                    'Public Transport': 'fa fa-bus',
+                    'Parking': 'fas fa-parking',
+                    'Illegal Parking': 'fa fa-times-circle',
+                    'Queue Length': 'fa fa-road',
+                    'Interview': 'fas fa-clipboard-list'
+                    }
 
-	//populating the map with json data with circle markers and clustered markers
+    function geticon (type,id){
+        if (typeof id == 'undefined'){
+            color = 'black'
+        } else {
+            color = getColor(parseInt(id)*30)
+        }
+        return '<i class="'+type+'" style="color: '+color+'"></i>'
+    }
 
-		function protecland_marker(feature, latlng) {
-			return L.circleMarker(latlng, {
-				radius: 8.0,
-				fillColor: getColor(parseInt(feature.properties.SurveyID.SurveyID	)*30),
-				color: '#000000',
-				weight: 1,
-				opacity: 1.0,
-				fillOpacity: 0.8,
-				popupAnchor:  [-4, 0]
-			})
-		}
+    //Defining the map marker icon
+    function protecland_marker(feature, latlng) {
+        return new L.Marker(latlng, {
+            icon: L.divIcon({
+                html: geticon (surveyicon[feature.properties.Survey],feature.properties.SurveyID.SurveyID),
+                iconSize: [40, 40],
+                className: 'myDivIcon'
+              })
+        })
+    }
 
 
 	//handle feature clicked events
@@ -211,7 +194,7 @@ function create_map(map, options){
 	// layer for holding the data
 	map_survey = JSON.parse(map_survey_str)
 	
-	function populate_map(rangeMin,rangeMax,filter_str){
+	function populate_map(rangeMin,rangeMax,filter_str,layerkey){
 		return (L.geoJson(map_survey,{
 			coordsToLatLng: function (coords) {
 				return new L.LatLng(coords[0], coords[1], coords[2]);
@@ -220,7 +203,9 @@ function create_map(map, options){
 				if (feature.properties){
 					 return ((feature.properties.SurveyID.IssueDate.substr(0,4) <= rangeMax) &&
 						(feature.properties.SurveyID.IssueDate.substr(0,4) >= rangeMin) &&
-						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.Project.includes(filter_str)))
+						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.Project.includes(filter_str)) &&
+						(feature.properties.Survey.includes(layerkey))
+						)
 					}
 				},
 			onEachFeature:popUp,
@@ -229,13 +214,25 @@ function create_map(map, options){
 		}))
 	}
 	// layer for display on the map
-	
-	surveys = populate_map(2017,new Date().getFullYear())
-	surveysLayer = L.geoJson(null).addTo(map);
-	$("#loading").hide();
-	syncSidebar();
-	
 
+        surveysLayer = L.geoJson(null);
+        vehLayer = L.geoJson(null).addTo(map);
+        pedLayer = L.geoJson(null).addTo(map);
+        ptLayer = L.geoJson(null).addTo(map);
+        parkingLayer = L.geoJson(null).addTo(map);
+        illparkLayer = L.geoJson(null).addTo(map);
+        qlengthLayer = L.geoJson(null).addTo(map);
+        interviewLayer = L.geoJson(null).addTo(map);
+        layerList = {
+                    'Vehicular':vehLayer,
+                    'Pedestrian': pedLayer,
+                    'Public Transport': ptLayer,
+                    'Parking': parkingLayer,
+                    'Illegal Parking': illparkLayer,
+                    'Queue Length': qlengthLayer,
+                    'Interview': interviewLayer
+                    };
+        surveys = new L.LayerGroup([]);
 
 	/* Single marker cluster layer to hold all clusters */
 	var markerClusters = new L.MarkerClusterGroup({
@@ -245,36 +242,24 @@ function create_map(map, options){
 	  disableClusteringAtZoom: 8
 	}).addTo(map);
 
-
 	/* Filter sidebar feature list to only show features in current map bounds */
 	map.on("moveend", function (e) {
 	  syncSidebar();
 	});
+
+    map.on("overlayadd", function(e){
+        syncSidebar();
+    });
+
+    map.on("overlayremove", function(e){
+        syncSidebar();
+    });
 
 	/* Clear feature highlight when map is clicked */
 	map.on("click", function(e) {
 	  highlight.clearLayers();
 	});
 
-	/* Attribution control */
-	function updateAttribution(e) {
-	  $.each(map._layers, function(index, layer) {
-		if (layer.getAttribution) {
-		  $("#attribution").html((layer.getAttribution()));
-		}
-	  });
-	}
-
-
-	var attributionControl = L.control({
-	  position: "bottomright"
-	});
-	attributionControl.onAdd = function (map) {
-	  var div = L.DomUtil.create("div", "leaflet-control-attribution");
-	  div.innerHTML = "</span><a href='#' onclick='$(\"#attributionModal\").modal(\"show\"); return false;'>Attribution</a>";
-	  return div;
-	};
-	map.addControl(attributionControl);
 
 	var zoomControl = L.control.zoom({
 	  position: "bottomright"
@@ -288,17 +273,23 @@ function create_map(map, options){
 	  var isCollapsed = false;
 	}
 
+    /* layer for basemap */
 	var baseLayers = {
 	  "Street Map": cartoLight,
 	};
 
+    /* individual layers for survey type */
+    var groupedOverlaysLegend = {};
+    for (const [key, value] of Object.entries(layerList)){
+        groupedOverlaysLegend[geticon(surveyicon[key]) + "&nbsp;" + key] = value
+        };
+
 	var groupedOverlays = {
-	  "Points of Interest": {
-		"&nbsp;Surveys": surveysLayer,
-	  },
+	  "Points of Interest": groupedOverlaysLegend
 
 	};
 
+    // select survey type
 	var layerControl = L.control.groupedLayers(baseLayers, groupedOverlays, {
 	  collapsed: isCollapsed
 	}).addTo(map);
@@ -328,7 +319,8 @@ function create_map(map, options){
 	} else {
 	  L.DomEvent.disableClickPropagation(container);
 	}
-	
+
+	// slider for filtering survey issue year
 	var ThisYear = new Date().getFullYear();
 	var slidervar = $("#slider")[0];
 	noUiSlider.create(slidervar, {
@@ -361,28 +353,89 @@ function create_map(map, options){
                 rangeMax = document.getElementById('input-number-max').value;
 				
 				map.eachLayer(function (layer) {
-                        if (layer === surveysLayer){
+                        if (Object.values(layerList).indexOf(layer)>-1){
                             layer.clearLayers();
 				}})
-						
-				surveys = populate_map(rangeMin,rangeMax,filter_str)
-				surveys.addTo(surveysLayer);
+
+                for (const [key,value] of Object.entries(layerList)){
+                        dummy = populate_map(rangeMin,rangeMax,filter_str,key)
+				        dummy.addTo(value);
+				        dummy.addTo(surveys);
+                }
 				$("#loading").hide();
 				syncSidebar();
 
 	})
+
+    // filter survey id number and survey project name
 	var filter_box = $("#filter")[0];
 	filter_box.oninput = function( ){
 		filter_str = filter_box.value;
 		
-		map.eachLayer(function (layer) {
-                        if (layer === surveysLayer){
-                            layer.clearLayers();
-				}})
-						
-		surveys = populate_map(rangeMin,rangeMax,filter_str)
-		surveys.addTo(surveysLayer);
-		$("#loading").hide();
-		syncSidebar();
+            map.eachLayer(function (layer) {
+                    if (Object.values(layerList).indexOf(layer)>-1){
+                        layer.clearLayers();
+            }})
+
+            for (const [key, value] of Object.entries(layerList)){
+                    dummy = populate_map(rangeMin,rangeMax,filter_str,key)
+                    dummy.addTo(value);
+                    dummy.addTo(surveys);
+            }
+            $("#loading").hide();
+            syncSidebar();
 	}
+
+    L.LayerGroup.include({
+        customGetLayer: function (id) {
+            for (var i in this._layers) {
+                for (var j in this._layers[i]._layers){
+                    if (j == id) {
+                        return this._layers[i]._layers[j];
+                    }
+                }
+            }
+        }
+    });
+
+    // set map focus on the clicked survey
+    function sidebarClick(id) {
+	  var layer = surveys.customGetLayer(id);
+	  map.setView([layer.getLatLng().lat, layer.getLatLng().lng], 17);
+	  layer.fire("click");
+	  /* Hide sidebar and go to the map on small screens */
+	  if (document.body.clientWidth <= 767) {
+		$("#sidebar").hide();
+		map.invalidateSize();
+	  }
+	}
+
+    // refresh side bar survey list
+	function syncSidebar() {
+	  /* Empty sidebar features */
+	  $("#feature-list tbody").empty();
+	  /* Loop through theaters layer and add only features which are in the map bounds */
+	  for (const [key, value] of Object.entries(layerList)){
+          value.eachLayer(function (layer) {
+             if (map.hasLayer(value)){
+                layer.eachLayer(function (layer){
+                  if (map.getBounds().contains(layer.getLatLng())) {
+                    $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng +
+                    '"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + layer.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: '+ getColor(parseInt(layer.feature.properties.SurveyID.SurveyID	)*30) +';"></span><br />' +
+                    layer.feature.properties.SurveyID.Project + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+              }
+            })
+            }
+          })
+	  };
+	  /* Update list.js featureList */
+	  featureList = new List("features", {
+		valueNames: ["feature-name"]
+	  });
+	  featureList.sort("feature-name", {
+		order: "asc"
+	  });
+	}
+
+
 }

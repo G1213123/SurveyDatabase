@@ -43,6 +43,12 @@ input[type="radio"], input[type="checkbox"] {
 #aboutTabsContent {
   padding-top: 10px;
 }
+.myDivIcon {
+  text-align: center; /* Horizontally center the text (icon) */
+  line-height: 20px; /* Vertically center the text (icon) */
+    font-size: 30px;
+    text-shadow: 0 0 5px #000;
+}
 .dot {
   height: 15px;
   width: 15px;
