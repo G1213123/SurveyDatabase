@@ -26,17 +26,10 @@ function create_map(map, options){
 	});
 
 	$("#full-extent-btn").click(function() {
-	  map.fitBounds(surveys.getBounds());
+	  map.flyTo([22.375, 114.126], 11);
 	  $(".navbar-collapse.in").collapse("hide");
 	  return false;
 	});
-
-	$("#legend-btn").click(function() {
-	  $("#legendModal").modal("show");
-	  $(".navbar-collapse.in").collapse("hide");
-	  return false;
-	});
-
 
 	$("#list-btn").click(function() {
 	  animateSidebar();

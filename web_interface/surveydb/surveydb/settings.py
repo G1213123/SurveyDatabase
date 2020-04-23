@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'surveydb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': os.path.join( BASE_DIR, 'db.sqlite3' ),
+        'NAME': os.path.join( r'\\hkkwn200dat13\T&I\D5\Traffic and Transport Team\02 Traffic Survey\06 Survey Works Order\GeoDatabase\surveydb', 'db.sqlite3' ),
     }
 }
 """
@@ -149,8 +149,8 @@ STATICFILES_DIRS = [
 ]
 
 LEAFLET_CONFIG = {
-  'DEFAULT_CENTER': (22.31,114.15),
-  'DEFAULT_ZOOM': 12,
+  'DEFAULT_CENTER': (22.375,114.126),
+  'DEFAULT_ZOOM': 11,
   'MIN_ZOOM': 1,
   'MAX_ZOOM': 20,
     'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
