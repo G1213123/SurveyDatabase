@@ -35,7 +35,7 @@ class Survey( models.Model ):
     objects = SurveyManager()
 
     def natural_key(self):
-        return {'SurveyID':self.SurveyID,  'JobNumber':self.JobNumber, 'Project':self.Project, 'Survey':self.Survey, 'IssueDate':self.IssueDate, 'Times':self.get_times()}
+        return {'SurveyID':self.SurveyID,  'JobNumber':self.JobNumber, 'Project':self.Project, 'Survey':self.Survey, 'IssueDate':self.IssueDate, 'Times':self.get_times(), 'Remark':self.Remark}
 
     def __str__(self):
         return self.SurveyID

@@ -28,7 +28,7 @@ class SurveyAdmin(OSMGeoAdmin):
         if '_continue' in request.POST:
             return HttpResponseRedirect(f'/admin/bokehMap/time/add?SurveyID={obj.pk}')
         else:
-            return('/admin/bokehMap/survey')
+            return  HttpResponseRedirect('/admin/bokehMap/survey/add')
 
 
 
