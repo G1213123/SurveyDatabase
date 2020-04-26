@@ -151,11 +151,11 @@ function create_map(map, options){
                     'Interview': 'fas fa-clipboard-list'
                     }
 
-    function geticon (type,id, remark){
-        if (typeof id == 'undefined' || remark == "Cancelled"){
+    function geticon (type,id){
+        if (typeof id == 'undefined'){
             color = 'black'
         } else {
-            color = getColor(parseInt(id.replace(/^.*?(\d+).*/,'$1'))*30)
+            color = getColor(parseInt(id)*30)
         }
         return '<i class="'+type+'" style="color: '+color+'"></i>'
     }
@@ -164,7 +164,7 @@ function create_map(map, options){
     function protecland_marker(feature, latlng) {
         return new L.Marker(latlng, {
             icon: L.divIcon({
-                html: geticon (surveyicon[feature.properties.Survey],feature.properties.SurveyID.SurveyID,feature.properties.SurveyID.Remark),
+                html: geticon (surveyicon[feature.properties.Survey],feature.properties.SurveyID.SurveyID),
                 iconSize: [40, 40],
                 className: 'myDivIcon'
               })
@@ -216,7 +216,6 @@ function create_map(map, options){
         illparkLayer = L.geoJson(null).addTo(map);
         qlengthLayer = L.geoJson(null).addTo(map);
         interviewLayer = L.geoJson(null).addTo(map);
-        cancelLayer = L.geoJson(null).addTo(map);
         layerList = {
                     'Vehicular':vehLayer,
                     'Pedestrian': pedLayer,
@@ -224,8 +223,7 @@ function create_map(map, options){
                     'Parking': parkingLayer,
                     'Illegal Parking': illparkLayer,
                     'Queue Length': qlengthLayer,
-                    'Interview': interviewLayer,
-                    'Cancelled': cancelLayer
+                    'Interview': interviewLayer
                     };
         surveys = new L.LayerGroup([]);
 
@@ -275,8 +273,7 @@ function create_map(map, options){
 
     /* individual layers for survey type */
     var groupedOverlaysLegend = {};
-    for (key in layerList){
-        value = layerList[key];
+    for (const [key, value] of Object.entries(layerList)){
         groupedOverlaysLegend[geticon(surveyicon[key]) + "&nbsp;" + key] = value
         };
 
@@ -349,12 +346,11 @@ function create_map(map, options){
                 rangeMax = document.getElementById('input-number-max').value;
 				
 				map.eachLayer(function (layer) {
-                        if (Object.keys(layerList).map(itm => layerList[itm]).indexOf(layer)>-1){
+                        if (Object.values(layerList).indexOf(layer)>-1){
                             layer.clearLayers();
 				}})
 
-                for (key in layerList){
-                        value=layerList[key];
+                for (const [key,value] of Object.entries(layerList)){
                         dummy = populate_map(rangeMin,rangeMax,filter_str,key)
 				        dummy.addTo(value);
 				        dummy.addTo(surveys);
@@ -366,27 +362,21 @@ function create_map(map, options){
 
     // filter survey id number and survey project name
 	var filter_box = $("#filter")[0];
-	var timeout = null;
 	filter_box.oninput = function( ){
 		filter_str = filter_box.value;
-        if (timeout !== null) {
-            clearTimeout(timeout);
-        }
-        timeout = setTimeout(function () {
+		
             map.eachLayer(function (layer) {
                     if (Object.values(layerList).indexOf(layer)>-1){
                         layer.clearLayers();
             }})
 
-            for (key in layerList){
-                        value=layerList[key];
+            for (const [key, value] of Object.entries(layerList)){
                     dummy = populate_map(rangeMin,rangeMax,filter_str,key)
                     dummy.addTo(value);
                     dummy.addTo(surveys);
             }
             $("#loading").hide();
             syncSidebar();
-        },500)
 	}
 
     L.LayerGroup.include({
@@ -418,8 +408,7 @@ function create_map(map, options){
 	  /* Empty sidebar features */
 	  $("#feature-list tbody").empty();
 	  /* Loop through theaters layer and add only features which are in the map bounds */
-	  for (key in layerList){
-            value=layerList[key];
+	  for (const [key, value] of Object.entries(layerList)){
           value.eachLayer(function (layer) {
              if (map.hasLayer(value)){
                 layer.eachLayer(function (layer){

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_filters',
     'leaflet',
     'multiselectfield',
+    'mapwidgets',
     ]
 
 MIDDLEWARE = [
@@ -153,5 +154,16 @@ LEAFLET_CONFIG = {
   'DEFAULT_ZOOM': 11,
   'MIN_ZOOM': 1,
   'MAX_ZOOM': 20,
-    'TILES': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+    'TILES': 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+}
+
+GOOGLE_MAP_API_KEY = 'AIzaSyB1ahSJjh6TtRwXmLOCTJ6eDY_dchw5v4s'
+MAP_WIDGETS = {
+    "GooglePointFieldWidget": (
+        ("zoom", 15),
+        ("mapCenterLocation", [22.375,114.126]),
+        ("markerFitZoom", 11),
+        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {'country': 'uk'}})
+    ),
+    "GOOGLE_MAP_API_KEY": GOOGLE_MAP_API_KEY,
 }
