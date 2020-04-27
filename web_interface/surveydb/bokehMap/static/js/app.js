@@ -223,7 +223,7 @@ function create_map(map, options){
         illparkLayer = L.geoJson(null).addTo(map);
         qlengthLayer = L.geoJson(null).addTo(map);
         interviewLayer = L.geoJson(null).addTo(map);
-        cancelLayer = L.geoJson(null).addTo(map);
+        cancelLayer = L.geoJson(null);
         layerList = {
                     'Vehicular':vehLayer,
                     'Pedestrian': pedLayer,
