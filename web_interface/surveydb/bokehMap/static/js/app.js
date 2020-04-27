@@ -151,11 +151,11 @@ function create_map(map, options){
                     'Interview': 'fas fa-clipboard-list'
                     }
 
-    function geticon (type,id){
-        if (typeof id == 'undefined'){
+    function geticon (type,id, remark){
+        if (typeof id == 'undefined' || remark == "Cancelled"){
             color = 'black'
         } else {
-            color = getColor(parseInt(id)*30)
+            color = getColor(parseInt(id.replace(/^.*?(\d+).*/,'$1'))*30)
         }
         return '<i class="'+type+'" style="color: '+color+'"></i>'
     }
@@ -164,7 +164,7 @@ function create_map(map, options){
     function protecland_marker(feature, latlng) {
         return new L.Marker(latlng, {
             icon: L.divIcon({
-                html: geticon (surveyicon[feature.properties.Survey],feature.properties.SurveyID.SurveyID),
+                html: geticon (surveyicon[feature.properties.Survey],feature.properties.SurveyID.SurveyID,feature.properties.SurveyID.Remark),
                 iconSize: [40, 40],
                 className: 'myDivIcon'
               })
@@ -193,7 +193,14 @@ function create_map(map, options){
 				return new L.LatLng(coords[0], coords[1], coords[2]);
 			},
 			filter: function(feature, layer) {
-				if (feature.properties){
+				if (feature.properties.SurveyID.Remark=='Cancelled' && layerkey=='Cancelled'){
+				    return ((feature.properties.SurveyID.IssueDate.substr(0,4) <= rangeMax) &&
+						(feature.properties.SurveyID.IssueDate.substr(0,4) >= rangeMin) &&
+						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.Project.includes(filter_str))
+
+						)
+				}
+				else if (feature.properties.SurveyID.Remark!='Cancelled'){
 					 return ((feature.properties.SurveyID.IssueDate.substr(0,4) <= rangeMax) &&
 						(feature.properties.SurveyID.IssueDate.substr(0,4) >= rangeMin) &&
 						(feature.properties.SurveyID.SurveyID.includes(filter_str) || feature.properties.SurveyID.Project.includes(filter_str)) &&
@@ -216,6 +223,7 @@ function create_map(map, options){
         illparkLayer = L.geoJson(null).addTo(map);
         qlengthLayer = L.geoJson(null).addTo(map);
         interviewLayer = L.geoJson(null).addTo(map);
+        cancelLayer = L.geoJson(null).addTo(map);
         layerList = {
                     'Vehicular':vehLayer,
                     'Pedestrian': pedLayer,
@@ -223,7 +231,8 @@ function create_map(map, options){
                     'Parking': parkingLayer,
                     'Illegal Parking': illparkLayer,
                     'Queue Length': qlengthLayer,
-                    'Interview': interviewLayer
+                    'Interview': interviewLayer,
+                    'Cancelled': cancelLayer,
                     };
         surveys = new L.LayerGroup([]);
 
@@ -364,7 +373,11 @@ function create_map(map, options){
 	var filter_box = $("#filter")[0];
 	filter_box.oninput = function( ){
 		filter_str = filter_box.value;
-		
+
+        if (timeout !== null) {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(function () {
             map.eachLayer(function (layer) {
                     if (Object.values(layerList).indexOf(layer)>-1){
                         layer.clearLayers();
@@ -377,6 +390,7 @@ function create_map(map, options){
             }
             $("#loading").hide();
             syncSidebar();
+	    },500)
 	}
 
     L.LayerGroup.include({
