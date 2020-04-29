@@ -155,7 +155,7 @@ function create_map(map, options){
         if (typeof id == 'undefined' || remark == "Cancelled"){
             color = 'black'
         } else {
-            color = getColor(parseInt(id.replace(/^.*?(\d+).*/,'$1'))*30)
+            color = getColor(parseInt(id.replace(/^.*?(\d+).*/,'$1'))*35)
         }
         return '<i class="'+type+'" style="color: '+color+'"></i>'
     }
@@ -178,6 +178,12 @@ function create_map(map, options){
 		if (f.properties){
 			for(key in f.properties.SurveyID){
 				var descipt = (key!="Survey")? f.properties.SurveyID[key] : f.properties.Survey;
+				if (descipt == null){
+				    descipt = "";
+				} else {
+				    descipt = descipt.replace(/[\[\]']/g,'' );
+				}
+
 				out.push("<b>" + key+": </b>"+ descipt);
 			}
 			l.bindPopup(out.join("<br />"));
@@ -428,7 +434,7 @@ function create_map(map, options){
                 layer.eachLayer(function (layer){
                   if (map.getBounds().contains(layer.getLatLng())) {
                     $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng +
-                    '"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + layer.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: '+ getColor(parseInt(layer.feature.properties.SurveyID.SurveyID	)*30) +';"></span><br />' +
+                    '"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + layer.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: '+ getColor(parseInt(layer.feature.properties.SurveyID.SurveyID.replace(/^.*?(\d+).*/,'$1'))*35) +';"></span><br />' +
                     layer.feature.properties.SurveyID.Project + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
               }
             })
