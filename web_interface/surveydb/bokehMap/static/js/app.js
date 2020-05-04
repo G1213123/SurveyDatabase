@@ -179,13 +179,16 @@ function create_map(map, options){
 			for(key in f.properties.SurveyID){
 				var descipt = (key!="Survey")? f.properties.SurveyID[key] : f.properties.Survey;
 				if (descipt == null){
-				    descipt = "";
+				    descipt = "-";
 				} else {
 				    descipt = descipt.replace(/[\[\]']/g,'' );
 				}
 
 				out.push("<b>" + key+": </b>"+ descipt);
 			}
+			out.push('<a href="' +
+			            'file:'
+			            + '"> Details index')
 			l.bindPopup(out.join("<br />"));
 		}
 	}
