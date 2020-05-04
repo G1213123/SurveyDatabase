@@ -4,8 +4,11 @@ from django.http import HttpResponseRedirect
 
 from django.contrib.gis.admin import GeoModelAdmin
 from django.contrib.gis.admin import OSMGeoAdmin
+from django.contrib.gis.forms.widgets import OSMWidget
 from leaflet.admin import LeafletGeoAdmin
+from django.contrib.gis.geos import Point
 from leaflet.forms.widgets import LeafletWidget
+from mapwidgets.widgets import GooglePointFieldWidget
 from django.shortcuts import redirect
 from .models import Survey, Time, Location
 from django.contrib.admin.widgets import AdminTimeWidget
@@ -50,17 +53,39 @@ FORMFIELD_OVERRIDES = {
     models.MultiPolygonField: LEAFLET_FIELD_OPTIONS,
 }
 
+class FixedGooglePointFieldWidget(GooglePointFieldWidget):
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if isinstance(value,  Point):
+            x = value.x
+            value.x = value.y
+            value.y = x
+        return super(FixedGooglePointFieldWidget, self).render(name, value, attrs, renderer)
+
+class OverrideOSM(OSMWidget):
+    map_srid = 4326
 
 @admin.register(Location)
-class LocationAdmin(OSMGeoAdmin):
+class LocationAdmin(admin.ModelAdmin):
     list_display = ('SurveyID','Survey','location')
     readonly_fields = ('location',)
-    formfield_overrides = FORMFIELD_OVERRIDES
+    formfield_overrides = {
+        models.PointField: {"widget": GooglePointFieldWidget},
+        models.MultiPointField: {"widget": OverrideOSM(attrs={'map_width': 1920, 'map_height': 500, 'display_raw':True, 'map_srid':4326,
+                                                            'default_lat':22.31, 'default_lon':114.18, 'default_zoom':12})}
+    }
     default_lat = 2550029
     default_lon = 12709519
     default_zoom = 12
     map_width = 1280
     map_height = 400
+
+    def save_model(self, request, obj, form, change):
+        if obj.locations.geom_type == 'Point':
+            x=obj.location.y
+            obj.location.y=obj.location.x
+            obj.location.x=x
+        super( LocationAdmin, self ).save_model( request, obj, form, change )
 
     def get_readonly_fields(self, request, obj=None):
         if obj: # editing an existing object
@@ -76,7 +101,7 @@ class LocationAdmin(OSMGeoAdmin):
 
 
 @admin.register(Time)
-class LocationAdmin(admin.ModelAdmin):
+class TimeAdmin(admin.ModelAdmin):
     list_display = ('SurveyID', 'TStart', 'TEnd', 'TEnd')
     formfield_overrides = {
         models.TimeField: {'widget': SelectTimeWidget.SelectTimeWidget(minute_step=10, use_seconds=False)},}
