@@ -97,17 +97,9 @@ WSGI_APPLICATION = 'surveydb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': os.path.join( r'\\hkkwn200dat13\T&I\D5\Traffic and Transport Team\02 Traffic Survey\06 Survey Works Order\GeoDatabase\surveydb', 'db.sqlite3' ),
+        'NAME': os.path.join( BASE_DIR, 'db.sqlite3' ),
     }
 }
-"""
-'ENGINE': 'django.contrib.gis.db.backends.postgis',
-'NAME': 'gis',
-'USER': 'user001',
-'PASSWORD': '',
-'HOST': 'localhost',
-'PORT': '5432'
-"""
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -154,16 +146,15 @@ LEAFLET_CONFIG = {
   'DEFAULT_ZOOM': 11,
   'MIN_ZOOM': 1,
   'MAX_ZOOM': 20,
-    'TILES': 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+    'TILES': 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 }
 
-GOOGLE_MAP_API_KEY = 'AIzaSyB1ahSJjh6TtRwXmLOCTJ6eDY_dchw5v4s'
 MAP_WIDGETS = {
     "GooglePointFieldWidget": (
-        ("zoom", 15),
-        ("mapCenterLocation", [22.375,114.126]),
+        ("zoom", 11),
+        ("mapCenterLocation", [22.315,114.176]),
         ("markerFitZoom", 11),
-        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {'country': 'uk'}})
+        ("MINIFED", False)
     ),
-    "GOOGLE_MAP_API_KEY": GOOGLE_MAP_API_KEY,
+    "GOOGLE_MAP_API_KEY": 'AIzaSyB1ahSJjh6TtRwXmLOCTJ6eDY_dchw5v4s',
 }
