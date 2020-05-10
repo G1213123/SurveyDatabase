@@ -146,7 +146,7 @@ LEAFLET_CONFIG = {
   'DEFAULT_ZOOM': 11,
   'MIN_ZOOM': 1,
   'MAX_ZOOM': 20,
-    'TILES': 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    'TILES': ''
 }
 
 MAP_WIDGETS = {
