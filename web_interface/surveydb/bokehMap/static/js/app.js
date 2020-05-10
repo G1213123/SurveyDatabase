@@ -84,6 +84,10 @@ function create_map(map, options){
 	  radius: 10
 	};
 
+	//search function with geocode
+	control = new L.Control.Geocoder({geocoder:L.Control.Geocoder.nominatim(), hideMarkerOnCollapse: false});
+	control.addTo(map);
+
 	//generate random color base on the project number
 	//reference: https://gist.github.com/mjackson/5311256
 	var head_column = ["SurveyID", "Job Number", "Project Name", "Survey", "Issue Date"]
