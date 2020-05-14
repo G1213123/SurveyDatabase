@@ -85,6 +85,8 @@
         },
 		
 		updateLocationInput: function(lat, lng, place){
+		    lat = lat.toFixed(6);
+		    lng = lng.toFixed(6)
 			var location_input_val = "MULTIPOINT (" + lat + " " + lng + ")";
 			var legacy_location = this.locationInput.val();
 			
