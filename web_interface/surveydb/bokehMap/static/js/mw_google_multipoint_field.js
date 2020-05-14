@@ -84,7 +84,9 @@
             }
         },
 		
-		updateLocationInput: function(lat, lng, place){
+		updateLocationInput: function(lat_raw, lng_raw, place, add = true){
+		    lat = parseFloat(lat_raw).toFixed(6);
+		    lng = parseFloat(lng_raw).toFixed(6);
 			var location_input_val = "MULTIPOINT (" + lat + " " + lng + ")";
 			var legacy_location = this.locationInput.val();
 			
@@ -99,7 +101,10 @@
 			
 			);
 			this.updateCoordinatesInputs(lat, lng);
-			this.addMarkerToMap(lat, lng);
+			if (add){
+			    this.addMarkerToMap(lat, lng);
+			};
+
 			if ($.isEmptyObject(this.locationFieldValue)){
 				$(document).trigger(this.markerCreateTriggerNameSpace,
 					[place, lat, lng, this.wrapElemSelector, this.locationInput]
@@ -130,19 +135,18 @@
 		//remove original marker location from the locationInput String
 		dragMarkerSt: function(e){
             var legacy_location = this.locationInput.val();
-			var lat = e.latLng.lat();
-			var lng = e.latLng.lng();
+			var lat = e.latLng.lat().toFixed(6);
+			var lng = e.latLng.lng().toFixed(6);
 			this.locationInput.val(function(){
-				legacy_location.replace(", " + lat + " " + lng , "");
-				legacy_location.replace(lat + " " + lng , "");
+				legacy_location = legacy_location.replace(", " + lat + " " + lng , "");
+				legacy_location = legacy_location.replace("MULTIPOINT (" + lat + " " + lng + ")", "");
 				return legacy_location;
 					}
 			);
-
         },
 
         dragMarkerEd: function(e){
-            this.updateLocationInput(e.latLng.lat(), e.latLng.lng())
+            this.updateLocationInput(e.latLng.lat(), e.latLng.lng(), null, false)
         },
 
         handleAddMarkerBtnClick: function(e){
