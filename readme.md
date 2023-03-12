@@ -20,16 +20,6 @@ To set up the environment for the project, follow these steps:
 
 This will set the `GOOGLE_MAPS_API_KEY` environment variable to your API key.
 
-***
-
-If you don't have an SQLite database for the Django server, you can create one by following these steps:
-
-Run the following command to create the database file:
-
-```python manage.py migrate```
-
-This will create a new SQLite database file named db.sqlite3 in your project's root directory.
-
 
 ## Getting Started
 
@@ -40,7 +30,13 @@ To get started with the project, follow these steps:
 
 ```pip install -r requirements.txt```
 
-2. Run the server by running the following command:
+2. Run the following command to create the database file:
+
+```python manage.py migrate```
+
+This will create a new SQLite database file named db.sqlite3 in your project's root directory.
+
+3. Run the server by running the following command:
 
 ```python manage.py runserver```
 
