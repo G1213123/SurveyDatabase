@@ -20,7 +20,7 @@ To set up the environment for the project, follow these steps:
 
 This will set the `GOOGLE_MAPS_API_KEY` environment variable to your API key.
 
-___
+***
 
 If you don't have an SQLite database for the Django server, you can create one by following these steps:
 
