@@ -158,5 +158,5 @@ MAP_WIDGETS = {
         ("markerFitZoom", 11),
         ("MINIFED", False)
     ),
-    "GOOGLE_MAP_API_KEY": os.environ.get("GOOGLE_API_KEY"),
+    "GOOGLE_MAP_API_KEY": os.environ.get("GOOGLE_MAP_API_KEY"),
 }
