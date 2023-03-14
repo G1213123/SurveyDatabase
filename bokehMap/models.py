@@ -25,7 +25,7 @@ class Survey( models.Model ):
     SurveyID = models.CharField( max_length=10, unique=True, blank=False, primary_key=True )
     JobNumber = models.CharField( max_length=10, default=None, blank=True, null=True  )
     Project = models.TextField( max_length=500, default=None, blank=True, null=True  )
-    Survey = MultiSelectField( choices=SURVEY_CHOICES, default=None, blank=True, null=True, max_length=20 )
+    Survey = MultiSelectField( choices=SURVEY_CHOICES, default=None, blank=True, null=True, max_length=500 )
     Author = models.CharField( max_length=20, default=None, blank=True, null=True  )
     IssueDate = models.DateField(default=None, blank=True, null=True )
     Amount = models.DecimalField( max_digits=10, decimal_places=2, default=None, blank=True, null=True  )
@@ -73,7 +73,7 @@ class Location( models.Model ):
     SurveyID = models.ForeignKey( Survey, on_delete=models.CASCADE )
     location = models.PointField( srid=4326 )
     locations = models.MultiPointField( srid=4326, blank=True, null=True  )
-    Survey = MultiSelectField( choices=SURVEY_CHOICES, default='', blank=True, null=True, max_length=20)
+    Survey = MultiSelectField( choices=SURVEY_CHOICES, default='', blank=True, null=True, max_length=500)
 
 
     def save(self, *args, **kwargs):
