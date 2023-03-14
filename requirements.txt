@@ -1,4 +1,4 @@
-Django~=4.1.7
+pipDjango~=4.1.7
 djangorestframework~=3.14.0
 django-leaflet~=0.28.3
 bokeh~=3.1.0
