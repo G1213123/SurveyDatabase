@@ -10,6 +10,9 @@ Before you can run the project, you need to set up a Google Maps JavaScript API 
 3. Create a new API key for your project.
 4. Copy the API key.
 
+Another required dependency is OSGeo4W,
+download available at: [OSGeo4W](https://qgis.org/zh-Hant/site/forusers/alldownloads.html#osgeo4w-installer)
+
 ## Setting up the Environment
 
 To set up the environment for the project, follow these steps:
