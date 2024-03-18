@@ -16,9 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.urls import include, re_path
-from .import views
+
 from rest_framework.routers import DefaultRouter
-from .views import  MapView, dataset, QueryForm, SurveyListView
+from .views import  MapView, datasetJson, QueryForm, SurveyListView, datasetJson
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 
@@ -27,7 +27,8 @@ from django.shortcuts import redirect
 urlpatterns = [
     re_path(r'^$', lambda req: redirect('/map/')),
     re_path(r'^map/$', MapView, name='home'),
-    re_path(r'^data/$', dataset, name='data'),
+    re_path(r'^mapQuery/$', datasetJson, name='MayQuery'),
+    re_path(r'^data/$', datasetJson, name='data'),
     re_path(r'^form/$', QueryForm, name='form'),
     re_path(r'^surveys/$', SurveyListView.as_view(), name='surveys')
 ]

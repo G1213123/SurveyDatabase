@@ -1,7 +1,7 @@
 import json
 
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils.html import escapejs
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
@@ -16,6 +16,7 @@ from rest_framework_gis.serializers import (
 from .models import Survey, Location, Time
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework_gis.filters import InBBoxFilter
+from django.contrib.gis.geos import Polygon
 
 from django.core.serializers import serialize
 import datetime
@@ -27,6 +28,8 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.views.generic.list import ListView
+
+import django_filters
 
 from .models import Survey
 
@@ -64,22 +67,43 @@ class QueryForm( forms.Form ):
                 'class': 'form-control',
                 'placeholder': 'space-separated words matching title, synopsis, website or tags'
             } ) )
+    
+class PlayerProfileFilter(django_filters.FilterSet):
+    position = django_filters.CharFilter(method="my_custom_filter")
 
-def filter_books(Location, paramDict):
-    # paramDict = request.GET
-    params = paramDict.keys()
+    def my_custom_filter(self, queryset, name, value):
+        query = Q()
+        for position in value.split(","):
+            query |= Q(position__contains=position)
+        return queryset.filter(query)
+    
+    class Meta:
+        model = Location
+        fields = ['SurveyID__Survey']
 
+
+def filter_books(paramDict):
+    locations = Location.objects.all()
     # data filtering
     if any( x != '' for x in paramDict.values() ):
+        if paramDict['bbox'] != '':
+            vertex = get_all_values(json.loads(paramDict['bbox']))
+            geom  = Polygon.from_bbox(vertex)
+            locations = Location.objects.filter(location__within=geom)
+        if paramDict['type'] != '':
+            # Create an instance of your custom filter class
+            #filter_set = PlayerProfileFilter(paramDict, 'type', queryset=locations)
+            #locations = filter_set.qs
+            locations = locations.filter(Q(SurveyID__Survey__contains = paramDict['type']))  
         if paramDict['input-number-min'] != '':
             after_date = paramDict['input-number-min']
-            _after_date = datetime.date(after_date, 1, 1)
-            Location = Location.filter( SurveyID__IssueDate__gte=_after_date )
+            _after_date = datetime.date(int(after_date), 1, 1)
+            locations = locations.filter( SurveyID__IssueDate__gte=_after_date )
 
         if paramDict['input-number-max'] != '':
             before_date  = paramDict['input-number-max']
-            _before_date  = datetime.date(before_date, 12, 31)
-            Location = Location.filter( SurveyID__IssueDate__lte=_before_date  )
+            _before_date  = datetime.date(int(before_date), 12, 31)
+            locations = locations.filter( SurveyID__IssueDate__lte=_before_date  )
 
         # filters records that contain any of the following keywords
         if paramDict['keywords'] != '':
@@ -89,9 +113,9 @@ def filter_books(Location, paramDict):
                         [Q( SurveyID__Project__icontains=kw ) for kw in kws]
             filters = Q()
             filters |= reduce( lambda x, y: x | y, q_lookups )
-            Location = Location.filter( filters )
+            locations = locations.filter( filters )
 
-    return Location
+    return locations
 
 
 def MapView(request):
@@ -108,7 +132,7 @@ def MapView(request):
             # redirect to a new URL:
             form = QueryForm( request.POST )
             paramDict = request.GET
-            locations = filter_books( locations, paramDict )
+            locations = filter_books( paramDict )
             survey = serialize( 'geojson', locations, fields=('SurveyID', 'Survey', 'location'), indent=2,
                                 use_natural_foreign_keys=True, use_natural_primary_keys=False )
             context = {
@@ -120,24 +144,37 @@ def MapView(request):
     else:
         form = QueryForm( request.POST )
         paramDict = request.GET
-        locations = filter_books(locations, paramDict)
+        locations = filter_books(paramDict)
         survey = serialize( 'geojson', locations, fields=('SurveyID', 'Survey', 'location'), indent=2,
                             use_natural_foreign_keys=True, use_natural_primary_keys=False )
         context = {
             'survey':mark_safe(escapejs(json.dumps(survey))),
             'form':form}
         return render(request, 'index2.html', context)
+    
+def MapQueryJson(request):
+    paramDict = request.POST
+    if len(paramDict):
+        locations = filter_books(paramDict)
+    else:
+        survey = serialize( 'geojson', locations, fields=('SurveyID', 'Survey', 'location'), indent=2,
+                            use_natural_foreign_keys=True, use_natural_primary_keys=False )
+    return JsonResponse(survey)
 
 class HomepageVIew( TemplateView ):
     template_name = 'index.html'
 
 
-def dataset(request):
-    survey = data_get()
-    return HttpResponse( survey, content_type='json' )
+def datasetJson(request):
+    paramDict = request.POST
+    if len(paramDict):
+        locations = filter_books(paramDict)
+    else:
+        locations = Location.objects.all()
+    return HttpResponse( data_get(locations), content_type='json' )
 
 def data_get(locations=Location):
-    survey = serialize( 'geojson', Location.objects.all(), fields=('SurveyID', 'location'), indent=2,
+    survey = serialize( 'geojson', locations, fields=('SurveyID', 'location'), indent=2,
                         use_natural_foreign_keys=True, use_natural_primary_keys=False )
     return survey
 
@@ -153,3 +190,17 @@ class SurveyListView(ListView):
         context = super().get_context_data(**kwargs)
         return context
 
+def get_all_values(data):
+    values = []
+    for value in data.values():
+        if isinstance(value, dict):
+            values.extend(get_all_values(value))
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    values.extend(get_all_values(item))
+                else:
+                    values.append(item)
+        else:
+            values.append(value)
+    return values

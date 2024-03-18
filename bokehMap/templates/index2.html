@@ -72,7 +72,7 @@
                 {% csrf_token %}
                 <div class="row">
                   <div class="col-xs-8 col-md-8">
-                    <input type="text" class="form-control search" id="filter"  placeholder="Filter" value="{{filter}}"/>
+                    <input type="text" class="form-control search" id="filter"  placeholder="Filter" value=""/>
                   </div>
                   <div class="col-xs-4 col-md-4">
                     <button type="button" class="btn btn-primary pull-right sort" data-sort="feature-name" id="sort-btn"><i class="fa fa-sort"></i>&nbsp;&nbsp;Sort</button>
@@ -83,8 +83,8 @@
                 </div>
                 <div class="row">
                   <div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
-                  <input type="number" min='1' max='35675999' id="input-number-min" value="{{ min_year }}">
-                  <input type="number" min='2' max='35676000' id="input-number-max" value="{{ max_year }}">
+                  <input type="number" min='1' max='35675999' id="input-number-min" value="2017">
+                  <input type="number" min='2' max='35676000' id="input-number-max" value="2024">
                   <input type="submit" value="OK">
                   </div>
                 </div>
@@ -111,14 +111,17 @@
       </div>
 
         {% leaflet_map "map" callback="window.create_map" %}
-    </div>
-    <div id="loading">
-      <div class="loading-indicator">
-        <div class="progress progress-striped active">
-          <div class="progress-bar progress-bar-info progress-bar-full"></div>
+        <div id="loading-overlay">
+          <div id="loading">
+            <div class="loading-indicator">
+              <div class="progress progress-striped active">
+                <div class="progress-bar progress-bar-info progress-bar-full"></div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
+
 
     <div class="modal fade" id="aboutModal" tabindex="0" role="dialog">
       <div class="modal-dialog modal-lg">
@@ -234,7 +237,7 @@
     {% leaflet_css %}
     <script>
     map_survey_str =  JSON.parse('{{ survey }}')
-
+    var csrftoken = '{{ csrf_token }}';
     </script>
 
 
