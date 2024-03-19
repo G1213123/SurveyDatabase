@@ -76,13 +76,14 @@ function create_map(map, options) {
 
 
 	/* Overlay Layers */
-	var highlight = L.geoJson(null);
 	var highlightStyle = {
 		stroke: false,
-		fillColor: "#00FFFF",
+		fillColor: "#FFFF00",
 		fillOpacity: 0.7,
-		radius: 10
+		radius: 30
 	};
+	var highlight = L.geoJson(null,highlightStyle).addTo(map);
+
 
 	//search function with geocode
 	control = new L.Control.Geocoder({ geocoder: L.Control.Geocoder.nominatim(), hideMarkerOnCollapse: false });
@@ -144,6 +145,17 @@ function create_map(map, options) {
 		return s + color[0] + ',' + color[1] + ',' + color[2] + ')';
 	}
 
+	surveyNames = [
+		'Vehicular',
+		'Pedestrian',
+		'Public Transport',
+		'Parking',
+		'Illegal Parking',
+		'Queue Length',
+		'Interview',
+		'Cancelled'
+	]
+
 	//font awesome icon used for survey types
 	surveyicon = {
 		'Vehicular': 'fa fa-car',
@@ -196,21 +208,62 @@ function create_map(map, options) {
 		}
 	}
 
-	// store the survey data string
+	/* Single marker cluster layer to hold all clusters */
+	var markerClusters = L.markerClusterGroup.layerSupport({
+		iconCreateFunction: function (cluster) {
+			var markers = cluster.getAllChildMarkers();
+			var html = '<div class="circle">' + markers.length + '</div>';
+			return L.divIcon({ html: html, className: 'mycluster', iconSize: L.point(32, 32) });
+		},
+		spiderfyOnMaxZoom: true,
+		showCoverageOnHover: false,
+		zoomToBoundsOnClick: true,
+	});
+
+	//surveysLayer = L.geoJson(null);
+	vehLayer = 			new L.LayerGroup()
+	pedLayer = 			new L.LayerGroup()
+	ptLayer = 			new L.LayerGroup()
+	parkingLayer = 		new L.LayerGroup()
+	illparkLayer = 		new L.LayerGroup()
+	qlengthLayer = 		new L.LayerGroup()
+	interviewLayer = 	new L.LayerGroup()
+	cancelLayer = 		new L.LayerGroup()
+	layerList = [
+		 vehLayer,
+		 pedLayer,
+		 ptLayer,
+		 parkingLayer,
+		 illparkLayer,
+		 qlengthLayer,
+		interviewLayer,
+		cancelLayer,
+	]
+	surveys = new L.LayerGroup(layerList);
+	markerClusters.checkIn(layerList)
+	markerClusters.addTo(map)
+	layerList.forEach(element => {
+		if (element != cancelLayer){
+		element.addTo(map)}
+	});
+
+		// store the survey data string
 	// map_survey = JSON.parse(map_survey_str)
 
-	function populate_map(json, layerkey) {
+	function create_marker(json, layerkey) {
 		return (L.geoJson(json, {
 			coordsToLatLng: function (coords) {
 				return new L.LatLng(coords[0], coords[1], coords[2]);
 			},
 			filter:function(feature, layer) {
 				return (feature.properties.SurveyID.Remark!='Cancelled')},
-			onEachFeature: popUp,
+			onEachFeature: function(feature, layer){
+				popUp(feature,layer);
+				layerList[layerkey].addLayer(layer)},
 			pointToLayer: function(feature, latlng) {
 				icon = {
 					icon: L.divIcon({
-						html: geticon(surveyicon[layerkey], feature.properties.SurveyID.SurveyID, feature.properties.SurveyID.Remark),
+						html: geticon(surveyicon[surveyNames[layerkey]], feature.properties.SurveyID.SurveyID, feature.properties.SurveyID.Remark),
 						iconSize: [40, 40],
 						className: 'myDivIcon'
 					})
@@ -222,37 +275,6 @@ function create_map(map, options) {
 		}))
 	}
 	// layer for display on the map
-
-	/* Single marker cluster layer to hold all clusters */
-	var markerClusters = new L.MarkerClusterGroup({
-		spiderfyOnMaxZoom: true,
-		showCoverageOnHover: false,
-		zoomToBoundsOnClick: true,
-		disableClusteringAtZoom: 8
-	}).addTo(map);
-
-	//surveysLayer = L.geoJson(null);
-	vehLayer = L.geoJson(null).addTo(map);
-	pedLayer = L.geoJson(null).addTo(map);
-	ptLayer = L.geoJson(null).addTo(map);
-	parkingLayer = L.geoJson(null).addTo(map);
-	illparkLayer = L.geoJson(null).addTo(map);
-	qlengthLayer = L.geoJson(null).addTo(map);
-	interviewLayer = L.geoJson(null).addTo(map);
-	cancelLayer = L.geoJson(null);
-	layerList = {
-		'Vehicular': vehLayer,
-		'Pedestrian': pedLayer,
-		'Public Transport': ptLayer,
-		'Parking': parkingLayer,
-		'Illegal Parking': illparkLayer,
-		'Queue Length': qlengthLayer,
-		'Interview': interviewLayer,
-		'Cancelled': cancelLayer,
-	};
-	surveys = new L.LayerGroup([]);
-
-	
 
 	/* Filter sidebar feature list to only show features in current map bounds */
 	map.on("moveend", function (e) {
@@ -293,8 +315,8 @@ function create_map(map, options) {
 
 	/* individual layers for survey type */
 	var groupedOverlaysLegend = {};
-	for (const [key, value] of Object.entries(layerList)) {
-		groupedOverlaysLegend[geticon(surveyicon[key]) + "&nbsp;" + key] = value
+	for (let [key, value] of layerList.entries()) {
+		groupedOverlaysLegend[geticon(surveyicon[surveyNames[key]]) + "&nbsp;" + [surveyNames[key]]] = value
 	};
 
 	var groupedOverlays = {
@@ -304,7 +326,7 @@ function create_map(map, options) {
 
 	// select survey type
 	var layerControl = L.control.groupedLayers(baseLayers, groupedOverlays, {
-		collapsed: isCollapsed
+		collapsed: false
 	}).addTo(map);
 
 	/* Highlight search box text on click */
@@ -365,11 +387,10 @@ function create_map(map, options) {
 		rangeMin = document.getElementById('input-number-min').value;
 		rangeMax = document.getElementById('input-number-max').value;
 
-		onMapChange();
-
-
 	})
+	slidervar.noUiSlider.on('change',onMapChange)
 
+	timeout = null
 	// filter survey id number and survey project name
 	var filter_box = $("#filter")[0];
 	filter_box.oninput = function () {
@@ -379,7 +400,7 @@ function create_map(map, options) {
 			clearTimeout(timeout);
 		}
 		timeout = setTimeout(function () {
-			onMapChange();
+			//onMapChange();
 
 		}, 500)
 	}
@@ -415,7 +436,7 @@ function create_map(map, options) {
 				"input-number-min": document.getElementById("input-number-min").value,
 				"input-number-max": document.getElementById("input-number-max").value,
 				"keywords": document.getElementById("filter").value,
-				"type":layerkey,
+				"type":surveyNames[layerkey],
 				"bbox": JSON.stringify(map.getBounds())
 			}),
 			headers: {
@@ -434,6 +455,7 @@ function create_map(map, options) {
 		/* Empty sidebar features */
 		$("#feature-list tbody").empty();
 		/* clear map features*/
+		surveys.clearLayers()
 		map.eachLayer(function (layer) {
 			if (Object.values(layerList).indexOf(layer) > -1) {
 				layer.clearLayers();
@@ -441,23 +463,19 @@ function create_map(map, options) {
 		})
 
 		/* Resent request for map bbox extent to fetch features*/
-		for (const [key, value] of Object.entries(layerList)) {
-			dummy = populate_map(await getfeaturejson(key), key)
-			dummy.addTo(value);
-			dummy.addTo(surveys);
-			markerClusters.addLayer(dummy)
-
-			/* Loop through theaters layer and add only features which are in the map bounds */
-			value.eachLayer(function (layer) {
-				if (map.hasLayer(value)) {
-					layer.eachLayer(function (layer) {
-						$("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng +
-							'"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + layer.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: ' + getColor(parseInt(layer.feature.properties.SurveyID.SurveyID.replace(/^.*?(\d+).*_/, '$1')) * 35) + ';"></span><br />' +
-							layer.feature.properties.SurveyID.Project + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
-					})
-				}
-			})
+		for (let [index, value] of layerList.entries()) {
+			create_marker(await getfeaturejson(index), index)
+			value.addTo(surveys);
 		}
+
+		/* Loop through theaters layer and add only features which are in the map bounds */
+		markerClusters.eachLayer(function (feature) {
+			$("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(feature) + '" lat="' + feature.getLatLng().lat + '" lng="' + feature.getLatLng().lng +
+				'"><td style="vertical-align: middle;"></td><td class="feature-name"><b>' + feature.feature.properties.SurveyID.SurveyID + '&nbsp;</b><span class="dot" style="background-color: ' + getColor(parseInt(feature.feature.properties.SurveyID.SurveyID.replace(/^.*?(\d+).*_/, '$1')) * 35) + ';"></span><br />' +
+				feature.feature.properties.SurveyID.Project + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+			})
+		
+		
 
 		/* Update list.js featureList */
 		featureList = new List("features", {
@@ -469,5 +487,5 @@ function create_map(map, options) {
 		$("#loading-overlay").hide();
 	}
 
-
+	onMapChange()
 }
